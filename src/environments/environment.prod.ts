@@ -10,9 +10,9 @@ export const environment = {
     measurementId: "G-KPT4LQPBEP"
   },
   stripe: {
-    publicKey: "pk_live_sua_chave_stripe_producao"
+    publicKey: "pk_test_sua_chave_stripe_aqui" // atualize se for usar Stripe
   },
   mercadoPago: {
-    publicKey: "sua_chave_mercadopago_producao"
+    publicKey: "TEST-sua_chave_mercadopago_aqui" // atualize se for usar MercadoPago
   }
 };

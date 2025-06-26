@@ -216,6 +216,19 @@ export class ReservasService {
     );
   }
 
+// abrirWhatsApp(telefone: string, codigo: string): void {
+//   const numero = telefone.replace(/\D/g, ''); // remove não dígitos
+//   const mensagem = encodeURIComponent(`Seu código de verificação é: ${codigo}`);
+//   const url = `https://wa.me/55${numero}?text=${mensagem}`;
+//   window.open(url, '_blank');
+// }
+
+// enviarSMS(telefone: string, codigo: string): void {
+//   const numero = telefone.replace(/\D/g, '');
+//   const mensagem = encodeURIComponent(`Seu código de verificação é: ${codigo}`);
+//   const smsUrl = `sms:+55${numero}?body=${mensagem}`;
+//   window.location.href = smsUrl;
+// }
   async verificarDisponibilidade(data: Date, horaInicio: string, horaFim: string): Promise<boolean> {
     try {
       const consulta = query(

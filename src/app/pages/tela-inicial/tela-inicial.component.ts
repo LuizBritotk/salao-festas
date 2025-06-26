@@ -271,50 +271,75 @@ import { RouterModule } from '@angular/router';
 })
 export class TelaInicialComponent implements OnInit {
   diferencialCards = [
-    {
-      title: 'Localização Privilegiada',
-      description: 'Fácil acesso, estacionamento amplo e ambiente seguro.',
-      icon: 'pi pi-map-marker',
-      bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
-    },
-    {
-      title: 'Estrutura Completa',
-      description: 'Salão climatizado, som e iluminação profissional.',
-      icon: 'pi pi-cog',
-      bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
-    },
-    {
-      title: 'Equipe Especializada',
-      description: 'Profissionais dedicados para cuidar do seu evento.',
-      icon: 'pi pi-users',
-      bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
-    }
-  ];
+  {
+    title: 'Estrutura Completa e Funcional',
+    description: '300m² de área com churrasqueira, cozinha espaçosa, freezer, micro-ondas, 2 banheiros e área externa com excelente circulação.',
+    icon: 'pi pi-building',
+    bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
+  },
+  {
+    title: 'Conforto para Todos',
+    description: 'Sacada ampla para até 20 pessoas, 120 mesas e 30 cadeiras disponíveis. Espaço acolhedor e seguro para todas as idades.',
+    icon: 'pi pi-users',
+    bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
+  },
+  {
+    title: 'Diversão Garantida',
+    description: 'Área kids com pula-pula e piscina de bolinhas para alegrar as crianças durante o evento.',
+    icon: 'pi pi-smile',
+    bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
+  },
+  {
+    title: 'Ambiente Seguro',
+    description: 'Acesso com escada protegido por porta de segurança, garantindo tranquilidade para famílias com crianças e idosos.',
+    icon: 'pi pi-shield',
+    bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
+  },
+  {
+    title: 'Localização de Fácil Acesso',
+    description: 'Situado na Vila Aparecida - Zona Leste de SP, com acesso prático e ambiente seguro para seus convidados.',
+    icon: 'pi pi-map-marker',
+    bg: 'bg-gradient-to-r from-dourado-300 to-dourado-500 text-white'
+  }
+];
+
 
   galeriaFotos = [
     { nome: 'Salão Decorado', categoria: 'Ambiente', url: 'assets/images/foto-salao-decorado.jpg' },
     { nome: 'Mesa Decorada', categoria: 'Decoração', url: 'assets/images/foto-mesa-decorado.jpg' },
-    { nome: 'Buffet', categoria: 'Serviço', url: 'assets/images/foto-buffet.jpg' },
-    { nome: 'Cerimônia', categoria: 'Evento', url: 'assets/images/foto-cerimonia.jpg' }
+    { nome: 'Área da Churrasqueira', categoria: 'Ambiente', url: 'assets/images/foto-churrasqueira-refrigerador.jpg' },
+    { nome: 'Churrasqueira Dupla', categoria: 'Detalhes', url: 'assets/images/foto-churrasqueira-dupla.jpg' },
+    { nome: 'Salão com Mesas e Brinquedos', categoria: 'Ambiente', url: 'assets/images/foto-salao-dupla-mesas-brinquedos.jpg' },
+    { nome: 'Vista da Sacada', categoria: 'Ambiente', url: 'assets/images/foto-salao-sacada.jpg' }
   ];
+depoimentos = [
+  {
+    nome: 'Maria Silva',
+    mensagem: 'Foi tudo impecável! Desde a estrutura até a atenção da equipe. O espaço foi o cenário perfeito para o nosso casamento. Não poderíamos ter escolhido melhor!',
+    tipoEvento: 'Casamento'
+  },
+  {
+    nome: 'João Pereira',
+    mensagem: 'Meu aniversário foi simplesmente inesquecível! As crianças amaram o pula-pula e a piscina de bolinhas. Todos os convidados elogiaram o ambiente!',
+    tipoEvento: 'Aniversário'
+  },
+  {
+    nome: 'Ana Costa',
+    mensagem: 'Realizamos um evento corporativo com mais de 50 pessoas e tudo saiu conforme planejado. Ambiente organizado, banheiros limpos e cozinha super funcional!',
+    tipoEvento: 'Evento Corporativo'
+  },
+  {
+    nome: 'Larissa Mendes',
+    mensagem: 'Reservei para o batizado do meu filho e fui surpreendida positivamente. A sacada foi um charme à parte e o espaço garantiu conforto para toda a família.',
+    tipoEvento: 'Batizado'
+  },
+  {
+    nome: 'Carlos Eduardo',
+    mensagem: 'Já participei de três eventos no Espaço Elias e em todos fui muito bem recebido. Estrutura ótima e localização excelente. Recomendo de olhos fechados!',
+    tipoEvento: 'Convidado Frequente'
+  }
+];
 
-  depoimentos = [
-    {
-      nome: 'Maria Silva',
-      mensagem: 'O salão foi perfeito para o meu casamento. Recomendo!',
-      tipoEvento: 'Casamento'
-    },
-    {
-      nome: 'João Pereira',
-      mensagem: 'Aniversário inesquecível com todos os detalhes impecáveis.',
-      tipoEvento: 'Aniversário'
-    },
-    {
-      nome: 'Ana Costa',
-      mensagem: 'Equipe atenciosa e espaço maravilhoso para eventos corporativos.',
-      tipoEvento: 'Evento Corporativo'
-    }
-  ];
 
   constructor() { }
 

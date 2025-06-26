@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ContatoService } from '../../services/contato.service';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tela-contato',
@@ -10,8 +12,17 @@ import { ContatoService } from '../../services/contato.service';
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
+
       <div class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          
+      <!-- Botão Voltar -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <button (click)="voltar()" class="flex items-center text-dourado-600 hover:text-dourado-800 font-medium">
+          <i class="pi pi-arrow-left mr-2"></i>
+          Voltar
+        </button>
+      </div>
           <div class="text-center">
             <h1 class="text-4xl font-bold text-gray-900 mb-4">
               Entre em 
@@ -194,11 +205,11 @@ import { ContatoService } from '../../services/contato.service';
                 <div class="flex items-start space-x-3">
                   <i class="pi pi-map-marker text-dourado-600 mt-1"></i>
                   <div>
-                    <p class="font-medium text-gray-900">Salão Imperial</p>
+                    <p class="font-medium text-gray-900">Espaço Elias</p>
                     <p class="text-gray-600">
-                      Rua das Festas, 123<br>
-                      Centro - São Paulo/SP<br>
-                      CEP: 01234-567
+                      R. Brás Ferreira da Silva, 176<br>
+                      Vila Aparecida - São Paulo/SP<br>
+                      CEP: 08020-150
                     </p>
                   </div>
                 </div>
@@ -213,7 +224,7 @@ import { ContatoService } from '../../services/contato.service';
                   <i class="pi pi-phone text-dourado-600"></i>
                   <div>
                     <p class="font-medium text-gray-900">Telefone</p>
-                    <p class="text-gray-600">(11) 99999-9999</p>
+                    <p class="text-gray-600">(11) 94078-9725</p>
                   </div>
                 </div>
                 
@@ -221,7 +232,7 @@ import { ContatoService } from '../../services/contato.service';
                   <i class="pi pi-whatsapp text-dourado-600"></i>
                   <div>
                     <p class="font-medium text-gray-900">WhatsApp</p>
-                    <p class="text-gray-600">(11) 99999-9999</p>
+                    <p class="text-gray-600">(11) 98933-2241</p>
                   </div>
                 </div>
                 
@@ -229,7 +240,7 @@ import { ContatoService } from '../../services/contato.service';
                   <i class="pi pi-envelope text-dourado-600"></i>
                   <div>
                     <p class="font-medium text-gray-900">E-mail</p>
-                    <p class="text-gray-600">contato&#64;salao-imperial.com.br</p>
+                    <p class="text-gray-600">spacoeliasfestas&#64;gmail.com</p>
                   </div>
                 </div>
               </div>
@@ -241,15 +252,15 @@ import { ContatoService } from '../../services/contato.service';
               <div class="space-y-2">
                 <div class="flex justify-between">
                   <span class="text-gray-600">Segunda a Sexta</span>
-                  <span class="font-medium text-gray-900">8h às 18h</span>
+                  <span class="font-medium text-gray-900">8h às 23h</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Sábado</span>
-                  <span class="font-medium text-gray-900">8h às 16h</span>
+                  <span class="font-medium text-gray-900">8h às 23h</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Domingo</span>
-                  <span class="font-medium text-gray-900">Fechado</span>
+                  <span class="font-medium text-gray-900">8h às 23h</span>
                 </div>
               </div>
             </div>
@@ -258,18 +269,24 @@ import { ContatoService } from '../../services/contato.service';
             <div class="bg-white rounded-lg shadow-lg p-8">
               <h3 class="text-xl font-bold text-gray-900 mb-4">Siga-nos</h3>
               <div class="flex space-x-4">
-                <a href="https://facebook.com" target="_blank" 
+                <!-- <a href="https://facebook.com" target="_blank" 
                    class="flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors duration-200">
                   <i class="pi pi-facebook text-xl"></i>
-                </a>
-                <a href="https://instagram.com" target="_blank" 
+                </a> -->
+                <a href="https://www.instagram.com/salao_elias" target="_blank" 
                    class="flex items-center justify-center w-12 h-12 bg-pink-100 text-pink-600 rounded-lg hover:bg-pink-200 transition-colors duration-200">
                   <i class="pi pi-instagram text-xl"></i>
                 </a>
-                <a href="https://whatsapp.com" target="_blank" 
+                <a href="https://wa.me/5511940789725" target="_blank" 
                    class="flex items-center justify-center w-12 h-12 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors duration-200">
                   <i class="pi pi-whatsapp text-xl"></i>
                 </a>
+                </div>
+                <div class="mt-8">
+                <iframe 
+                  src="https://www.google.com/maps?q=R.+Br%C3%A1s+Ferreira+da+Silva,+176+-+Vila+Aparecida,+S%C3%A3o+Paulo+-+SP,+08020-150&output=embed" 
+                  width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy">
+                </iframe>
               </div>
             </div>
           </div>
@@ -286,7 +303,9 @@ export class TelaContatoComponent {
 
   constructor(
     private fb: FormBuilder,
-    private contatoService: ContatoService
+    private contatoService: ContatoService,
+    private location: Location,
+    private router: Router,
   ) {
     this.formularioContato = this.fb.group({
       nome: ['', [Validators.required]],
@@ -321,5 +340,14 @@ export class TelaContatoComponent {
         this.enviando = false;
       }
     }
+  }
+
+    /*
+  * Método para voltar à tela anterior
+  * Utiliza o router para navegar de volta  
+  * Se não houver histórico, redireciona para a página inicial  
+  */
+ voltar(): void {
+    this.router.navigate(['/']); // ou para a rota que desejar
   }
 }

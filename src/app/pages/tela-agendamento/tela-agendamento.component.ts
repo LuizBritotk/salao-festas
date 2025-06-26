@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { FullCalendarModule, FullCalendarComponent } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -9,18 +9,22 @@ import { ReservasService } from '../../services/reservas.service';
 import { Router } from '@angular/router';
 
 
-interface EventoCalendario {
-  title: string;
-  start: Date;
-  color?: string;
-}
-
 @Component({
   selector: 'app-tela-agendamento',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FullCalendarModule],
+  imports: [CommonModule, ReactiveFormsModule, FullCalendarModule, FormsModule],
   template: `
     <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+
+  <!-- Botão Voltar -->
+  <div class="mb-6">
+    <button type="button" (click)="voltar()" class="flex items-center text-gray-600 hover:text-dourado-600 font-medium">
+      <i class="pi pi-arrow-left mr-2"></i>
+      Voltar
+    </button>
+  </div>
+
+  <!-- Título -->
   <div class="text-center mb-10">
     <h1 class="text-4xl font-bold text-gray-900">
       Agende sua <span class="text-dourado-600">Festa</span>
@@ -34,7 +38,9 @@ interface EventoCalendario {
   <div class="bg-white rounded-xl shadow p-8 max-w-3xl mx-auto">
     <form [formGroup]="formulario" (ngSubmit)="agendar()">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div>
+
+        <!-- Nome -->
+        <div class="sm:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
           <input type="text" formControlName="nome" class="form-input" placeholder="Nome completo" />
           <div *ngIf="formulario.get('nome')?.invalid && formulario.get('nome')?.touched" class="text-red-500 text-sm mt-1">
@@ -42,7 +48,8 @@ interface EventoCalendario {
           </div>
         </div>
 
-        <div>
+        <!-- Telefone -->
+        <div class="sm:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
           <input type="tel" formControlName="telefone" mask="(00) 00000-0000" class="form-input" placeholder="(11) 99999-9999" />
           <div *ngIf="formulario.get('telefone')?.invalid && formulario.get('telefone')?.touched" class="text-red-500 text-sm mt-1">
@@ -50,26 +57,30 @@ interface EventoCalendario {
           </div>
         </div>
 
+        <!-- Data + Horário -->
+        <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Data *</label>
+            <div class="flex gap-1 items-center">
+              <input type="text" formControlName="data" class="form-input" readonly placeholder="Clique no calendário" />
+              <button type="button" class="btn-primary px-4 py-2 text-sm" (click)="abrirCalendario()">📅</button>
+            </div>
+            <div *ngIf="formulario.get('data')?.invalid && formulario.get('data')?.touched" class="text-red-500 text-sm mt-1">
+              Data é obrigatória
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Horário *</label>
+            <input type="time" formControlName="horario" class="form-input" />
+            <div *ngIf="formulario.get('horario')?.invalid && formulario.get('horario')?.touched" class="text-red-500 text-sm mt-1">
+              Horário é obrigatório
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipo de Evento -->
         <div class="sm:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Data *</label>
-          <div class="flex gap-1 items-center">
-            <input type="text" formControlName="data" class="form-input" readonly placeholder="Clique no calendário acima" />
-            <button type="button" class="btn-primary px-4 py-2 text-sm" (click)="abrirCalendario()">Abrir Calendário</button>
-          </div>
-          <div *ngIf="formulario.get('data')?.invalid && formulario.get('data')?.touched" class="text-red-500 text-sm mt-1">
-            Data é obrigatória
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Horário *</label>
-          <input type="time" formControlName="horario" class="form-input" />
-          <div *ngIf="formulario.get('horario')?.invalid && formulario.get('horario')?.touched" class="text-red-500 text-sm mt-1">
-            Horário é obrigatório
-          </div>
-        </div>
-
-        <div class="sm:col-span-1">
           <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Evento *</label>
           <select formControlName="tipoEvento" class="form-input">
             <option value="">Selecione</option>
@@ -84,12 +95,14 @@ interface EventoCalendario {
           </div>
         </div>
 
+        <!-- Observações -->
         <div class="sm:col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
           <textarea rows="4" formControlName="observacoes" class="form-input resize-none" placeholder="Ex: Festa com DJ, necessidade de rampa..."></textarea>
         </div>
       </div>
 
+      <!-- Botão Enviar -->
       <button type="submit" [disabled]="formulario.invalid || enviando"
         class="btn-primary w-full mt-6 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
         <div *ngIf="enviando" class="spinner mr-2 w-4 h-4"></div>
@@ -98,6 +111,7 @@ interface EventoCalendario {
       </button>
     </form>
 
+    <!-- Feedback -->
     <div *ngIf="sucesso" class="text-green-700 bg-green-100 p-4 mt-4 rounded-lg">
       Solicitação enviada com sucesso!
     </div>
@@ -107,35 +121,39 @@ interface EventoCalendario {
     </div>
   </div>
 
+  <!-- Modal Calendário -->
   <div *ngIf="mostrarModalCalendario" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full relative">
-    <button (click)="fecharModalCalendario()" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-lg font-bold">
-      &times;
-    </button>
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl w-full relative">
+      <button (click)="fecharModalCalendario()" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-lg font-bold">
+        &times;
+      </button>
 
-    <h2 class="text-xl font-semibold mb-4 text-center text-gray-700">Escolha uma Data</h2>
+      <h2 class="text-xl font-semibold mb-4 text-center text-gray-700">Escolha uma Data</h2>
 
-    <div class="flex flex-col lg:flex-row gap-6">
-      <div class="flex-1">
-        <ng-container *ngIf="calendario">
-          <full-calendar #calendarioRef [options]="calendario"></full-calendar>
-        </ng-container>
-      </div>
-      <div class="w-full lg:w-56 bg-gray-50 p-4 rounded-lg border border-gray-200 h-fit self-start">
-        <h2 class="text-sm font-semibold text-gray-700 mb-3">Legenda</h2>
-        <ul class="space-y-2 text-sm">
-          <li *ngFor="let item of legendaCores" class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full" [style.background]="item.cor"></span>
-            {{ item.descricao }}
-          </li>
-        </ul>
+      <div class="flex flex-col lg:flex-row gap-6">
+        <div class="flex-1">
+          <ng-container *ngIf="calendario">
+            <full-calendar #calendarioRef [options]="calendario"></full-calendar>
+          </ng-container>
+        </div>
+        <div class="w-full lg:w-56 bg-gray-50 p-4 rounded-lg border border-gray-200 h-fit self-start">
+          <h2 class="text-sm font-semibold text-gray-700 mb-3">Legenda</h2>
+          <ul class="space-y-2 text-sm">
+            <li *ngFor="let item of legendaCores" class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full" [style.background]="item.cor"></span>
+              {{ item.descricao }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Rodapé -->
   <footer class="text-center text-gray-500 text-sm mt-10">
     © 2018 Espaço Elias. Todos os direitos reservados.
   </footer>
+</div>
   `,
   styles: [`.calendario-responsivo {
   @apply max-w-4xl mx-auto;
@@ -208,7 +226,8 @@ interface EventoCalendario {
 
   `]
 })
-
+// TelaAgendamentoComponent
+// Componente responsável por exibir a tela de agendamento de reservas
 export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
   @ViewChild('calendarioRef') calendarioRef?: FullCalendarComponent;
   @ViewChild('modalCalendario') modalCalendario?: any;
@@ -219,6 +238,11 @@ export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
   sucesso = false;
   erro = false;
   mostrarModalCalendario = false;
+  pinEnviado = false;
+  numeroVerificado = false;
+  codigoEnviado = '';
+  codigoDigitado = '';
+  erroPIN = false;
 
   legendaCores = [
     { cor: '#10B981', descricao: 'Dia Livre' },
@@ -231,6 +255,7 @@ export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
     private reservasService: ReservasService,
     private router: Router
   ) {
+    // Criação do formulário reativo com validações iniciais
     this.formulario = this.fb.group({
       nome: ['', Validators.required],
       telefone: ['', [Validators.required]],
@@ -241,6 +266,10 @@ export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /*
+   * Método executado na inicialização do componente
+   * Configura o calendário com os eventos retornados do serviço
+   */
   ngOnInit(): void {
     this.reservasService.obterDatasAgendadas().subscribe(eventos => {
       this.calendario = {
@@ -277,6 +306,9 @@ export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /*
+   * Após a visualização ser carregada, posiciona o calendário na data atual
+   */
   ngAfterViewInit(): void {
     setTimeout(() => {
       if (this.calendarioRef) {
@@ -286,22 +318,27 @@ export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // Abre o modal de calendário
   abrirCalendario(): void {
     this.mostrarModalCalendario = true;
   }
 
+  // Fecha o modal de calendário
   fecharModalCalendario(): void {
     this.mostrarModalCalendario = false;
   }
 
+  /*
+   * Método responsável por enviar a solicitação de agendamento
+   * Chama o serviço, mostra mensagens de sucesso/erro, e redireciona
+   */
   async agendar() {
-    if (this.formulario.valid) {
+    if (this.formulario.valid && this.numeroVerificado) {
       try {
         this.enviando = true;
         this.erro = false;
 
         await this.reservasService.solicitarAgendamento(this.formulario.value);
-
 
         this.sucesso = true;
         console.log('✔ Sucesso! Redirecionando para pagamento...');
@@ -317,20 +354,32 @@ export class TelaAgendamentoComponent implements OnInit, AfterViewInit {
     }
   }
 
-private limparCamposFormulario(): void {
-  this.formulario.patchValue({
-    nome: '',
-    telefone: '',
-    data: '',
-    horario: '',
-    tipoEvento: '',
-    observacoes: ''
-  });
+  /*
+   * Método que limpa todos os campos do formulário manualmente,
+   * além de resetar o estado de toque e alteração
+   */
+  private limparCamposFormulario(): void {
+    this.formulario.patchValue({
+      nome: '',
+      telefone: '',
+      data: '',
+      horario: '',
+      tipoEvento: '',
+      observacoes: ''
+    });
 
-  this.formulario.markAsPristine();
-  this.formulario.markAsUntouched();
-}
+    this.formulario.markAsPristine();
+    this.formulario.markAsUntouched();
+    this.numeroVerificado = false;
+    this.pinEnviado = false;
+    this.codigoDigitado = '';
+    this.codigoEnviado = '';
+    this.erroPIN = false;
+  }
 
+  /*
+   * Validador customizado que impede selecionar datas passadas
+   */
   private validarDataFutura(control: any) {
     const partes = control.value.split('/');
     if (partes.length !== 3) return { dataInvalida: true };
@@ -339,4 +388,14 @@ private limparCamposFormulario(): void {
     hoje.setHours(0, 0, 0, 0);
     return data >= hoje ? null : { dataInvalida: true };
   }
+
+  /*
+  * Método para voltar à tela anterior
+  * Utiliza o router para navegar de volta  
+  * Se não houver histórico, redireciona para a página inicial  
+  */
+ voltar(): void {
+  this.router.navigate(['/']); // ou para a rota que desejar
 }
+}
+
