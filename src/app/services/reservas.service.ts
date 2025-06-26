@@ -1,40 +1,126 @@
 import { Injectable } from '@angular/core';
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  getDocs,
   getDoc,
-  query, 
-  where, 
+  query,
+  where,
   orderBy,
   Timestamp
 } from 'firebase/firestore';
 import { Observable, from, map } from 'rxjs';
 import { FirebaseService } from './firebase.service';
-import { Reserva, StatusReserva, DisponibilidadeData } from '../interfaces/reserva.interface';
+import { Reserva, StatusReserva, DisponibilidadeData, StatusPagamento } from '../interfaces/reserva.interface';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ReservasService {
   private readonly colecaoReservas = 'reservas';
 
   constructor(private firebase: FirebaseService) {}
 
+  async solicitarAgendamento(dados: any): Promise<void> {
+    try {
+      debugger;
+
+      let dataEvento: Date;
+      let nomeContato: string = dados.nome || '';
+      let telefoneContato: string = dados.telefone || '';
+      let horario: string = dados.horario || '';
+      let tipoEvento: string = dados.tipoEvento || '';
+      let observacoes: string = dados.observacoes || '';
+
+      try {
+        const partes = dados.data?.split('/');
+        if (!partes || partes.length !== 3) {
+          throw new Error('Data em formato inválido');
+        }
+        const [dia, mes, ano] = partes;
+        dataEvento = new Date(`${ano}-${mes}-${dia}`);
+        if (isNaN(dataEvento.getTime())) {
+          throw new Error('Data inválida');
+        }
+      } catch (erro) {
+        console.error('❌ Erro ao converter data:', erro);
+        throw new Error('Data de agendamento inválida.');
+      }
+
+      const reserva: Omit<Reserva, 'id'> = {
+        usuarioId: '',
+        nomeContato,
+        emailContato: '',
+        telefoneContato,
+        dataEvento,
+        horaInicio: horario,
+        horaFim: this.calcularFim(horario),
+        tipoEvento,
+        numeroConvidados: 0,
+        valorTotal: 0,
+        observacoes,
+        servicosExtras: [],
+        status: StatusReserva.PENDENTE,
+        dataCriacao: new Date(),
+        dataUltimaAtualizacao: new Date(),
+        pagamento: {
+          status: StatusPagamento.PENDENTE,
+          metodoPagamento: 'pendente'
+        }
+      };
+
+      await this.criarReserva(reserva);
+    } catch (error) {
+      console.error('Erro ao solicitar agendamento:', error);
+      throw error;
+    }
+  }
+
+  private calcularFim(hora: string): string {
+    const [h, m] = hora.split(':').map(Number);
+    const novaHora = h + 4 >= 23 ? 23 : h + 4;
+    return `${novaHora.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  }
+
+  obterDatasAgendadas(): Observable<{ title: string; start: Date; color: string }[]> {
+    const consulta = query(
+      collection(this.firebase.firestore, this.colecaoReservas),
+      where('status', 'in', [StatusReserva.CONFIRMADA, StatusReserva.PENDENTE])
+    );
+
+    return from(getDocs(consulta)).pipe(
+      map(snapshot => snapshot.docs.map(doc => {
+        const dados = doc.data();
+        const status = dados['status'];
+        const cor = status === StatusReserva.CONFIRMADA ? '#EF4444' : '#F59E0B';
+
+        return {
+          title: 'Reservado',
+          start: dados['dataEvento'].toDate(),
+          color: cor
+        };
+      }))
+    );
+  }
+
   async criarReserva(reserva: Omit<Reserva, 'id'>): Promise<string> {
     try {
-      const docRef = await addDoc(
-        collection(this.firebase.firestore, this.colecaoReservas), 
-        {
-          ...reserva,
-          dataCriacao: Timestamp.fromDate(reserva.dataCriacao),
-          dataUltimaAtualizacao: Timestamp.fromDate(reserva.dataUltimaAtualizacao),
-          dataEvento: Timestamp.fromDate(reserva.dataEvento)
-        }
-      );
+      const payload: any = {
+        ...reserva,
+        dataCriacao: Timestamp.fromDate(reserva.dataCriacao),
+        dataUltimaAtualizacao: Timestamp.fromDate(reserva.dataUltimaAtualizacao),
+        dataEvento: Timestamp.fromDate(reserva.dataEvento)
+      };
+
+      if (reserva.pagamento?.dataPagamento) {
+        payload.pagamento = {
+          ...reserva.pagamento,
+          dataPagamento: Timestamp.fromDate(reserva.pagamento.dataPagamento)
+        };
+      }
+
+      const docRef = await addDoc(collection(this.firebase.firestore, this.colecaoReservas), payload);
       return docRef.id;
     } catch (error) {
       console.error('Erro ao criar reserva:', error);
@@ -44,13 +130,20 @@ export class ReservasService {
 
   async atualizarReserva(id: string, dadosAtualizacao: Partial<Reserva>): Promise<void> {
     try {
-      const dadosParaAtualizar = {
+      const dadosParaAtualizar: any = {
         ...dadosAtualizacao,
         dataUltimaAtualizacao: Timestamp.fromDate(new Date())
       };
 
       if (dadosAtualizacao.dataEvento) {
         dadosParaAtualizar.dataEvento = Timestamp.fromDate(dadosAtualizacao.dataEvento);
+      }
+
+      if (dadosAtualizacao.pagamento?.dataPagamento) {
+        dadosParaAtualizar.pagamento = {
+          ...dadosAtualizacao.pagamento,
+          dataPagamento: Timestamp.fromDate(dadosAtualizacao.pagamento.dataPagamento)
+        };
       }
 
       await updateDoc(doc(this.firebase.firestore, this.colecaoReservas, id), dadosParaAtualizar);
@@ -72,19 +165,22 @@ export class ReservasService {
   async obterReserva(id: string): Promise<Reserva | null> {
     try {
       const docSnap = await getDoc(doc(this.firebase.firestore, this.colecaoReservas, id));
-      
-      if (docSnap.exists()) {
-        const dados = docSnap.data();
-        return {
-          id: docSnap.id,
-          ...dados,
-          dataCriacao: dados.dataCriacao.toDate(),
-          dataUltimaAtualizacao: dados.dataUltimaAtualizacao.toDate(),
-          dataEvento: dados.dataEvento.toDate()
-        } as Reserva;
-      }
-      
-      return null;
+      if (!docSnap.exists()) return null;
+
+      const dados = docSnap.data();
+      return {
+        id: docSnap.id,
+        ...dados,
+        dataCriacao: dados['dataCriacao'].toDate(),
+        dataUltimaAtualizacao: dados['dataUltimaAtualizacao'].toDate(),
+        dataEvento: dados['dataEvento'].toDate(),
+        pagamento: dados['pagamento'] ? {
+          ...dados['pagamento'],
+          dataPagamento: dados['pagamento'].dataPagamento
+            ? dados['pagamento'].dataPagamento.toDate()
+            : undefined
+        } : undefined
+      } as Reserva;
     } catch (error) {
       console.error('Erro ao obter reserva:', error);
       throw error;
@@ -99,99 +195,25 @@ export class ReservasService {
     );
 
     return from(getDocs(consulta)).pipe(
-      map(snapshot => 
+      map(snapshot =>
         snapshot.docs.map(doc => {
           const dados = doc.data();
           return {
             id: doc.id,
             ...dados,
-            dataCriacao: dados.dataCriacao.toDate(),
-            dataUltimaAtualizacao: dados.dataUltimaAtualizacao.toDate(),
-            dataEvento: dados.dataEvento.toDate()
+            dataCriacao: dados['dataCriacao'].toDate(),
+            dataUltimaAtualizacao: dados['dataUltimaAtualizacao'].toDate(),
+            dataEvento: dados['dataEvento'].toDate(),
+            pagamento: dados['pagamento'] ? {
+              ...dados['pagamento'],
+              dataPagamento: dados['pagamento'].dataPagamento
+                ? dados['pagamento'].dataPagamento.toDate()
+                : undefined
+            } : undefined
           } as Reserva;
         })
       )
     );
-  }
-
-  async obterDisponibilidadeMes(ano: number, mes: number): Promise<DisponibilidadeData[]> {
-    try {
-      const inicioMes = new Date(ano, mes, 1);
-      const fimMes = new Date(ano, mes + 1, 0);
-
-      const consulta = query(
-        collection(this.firebase.firestore, this.colecaoReservas),
-        where('dataEvento', '>=', Timestamp.fromDate(inicioMes)),
-        where('dataEvento', '<=', Timestamp.fromDate(fimMes)),
-        where('status', 'in', [StatusReserva.CONFIRMADA, StatusReserva.PENDENTE])
-      );
-
-      const snapshot = await getDocs(consulta);
-      const reservasExistentes = snapshot.docs.map(doc => {
-        const dados = doc.data();
-        return {
-          id: doc.id,
-          ...dados,
-          dataCriacao: dados.dataCriacao.toDate(),
-          dataUltimaAtualizacao: dados.dataUltimaAtualizacao.toDate(),
-          dataEvento: dados.dataEvento.toDate()
-        } as Reserva;
-      });
-
-      // Gerar disponibilidade para cada dia do mês
-      const disponibilidade: DisponibilidadeData[] = [];
-      const diasNoMes = fimMes.getDate();
-
-      for (let dia = 1; dia <= diasNoMes; dia++) {
-        const data = new Date(ano, mes, dia);
-        const reservasNoDia = reservasExistentes.filter(
-          reserva => this.isMesmaData(reserva.dataEvento, data)
-        );
-
-        const horariosOcupados = reservasNoDia.map(reserva => ({
-          inicio: reserva.horaInicio,
-          fim: reserva.horaFim
-        }));
-
-        const horariosDisponiveis = this.calcularHorariosDisponiveis(horariosOcupados);
-
-        disponibilidade.push({
-          data,
-          disponivel: horariosDisponiveis.length > 0,
-          horariosDisponiveis,
-          reservas: reservasNoDia
-        });
-      }
-
-      return disponibilidade;
-    } catch (error) {
-      console.error('Erro ao obter disponibilidade:', error);
-      throw error;
-    }
-  }
-
-  private isMesmaData(data1: Date, data2: Date): boolean {
-    return data1.getDate() === data2.getDate() &&
-           data1.getMonth() === data2.getMonth() &&
-           data1.getFullYear() === data2.getFullYear();
-  }
-
-  private calcularHorariosDisponiveis(horariosOcupados: {inicio: string, fim: string}[]): string[] {
-    const todosHorarios = [
-      '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
-      '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
-      '20:00', '21:00', '22:00', '23:00'
-    ];
-
-    return todosHorarios.filter(horario => {
-      return !horariosOcupados.some(ocupado => {
-        const horarioNum = parseInt(horario.replace(':', ''));
-        const inicioNum = parseInt(ocupado.inicio.replace(':', ''));
-        const fimNum = parseInt(ocupado.fim.replace(':', ''));
-        
-        return horarioNum >= inicioNum && horarioNum < fimNum;
-      });
-    });
   }
 
   async verificarDisponibilidade(data: Date, horaInicio: string, horaFim: string): Promise<boolean> {
@@ -203,21 +225,19 @@ export class ReservasService {
       );
 
       const snapshot = await getDocs(consulta);
-      const reservasExistentes = snapshot.docs.map(doc => doc.data() as Reserva);
+      const reservas = snapshot.docs.map(doc => doc.data() as Reserva);
 
-      // Verificar se há conflito de horário
-      const horaInicioNum = parseInt(horaInicio.replace(':', ''));
-      const horaFimNum = parseInt(horaFim.replace(':', ''));
+      const inicio = parseInt(horaInicio.replace(':', ''));
+      const fim = parseInt(horaFim.replace(':', ''));
 
-      return !reservasExistentes.some(reserva => {
-        const reservaInicioNum = parseInt(reserva.horaInicio.replace(':', ''));
-        const reservaFimNum = parseInt(reserva.horaFim.replace(':', ''));
-
-        return (horaInicioNum < reservaFimNum && horaFimNum > reservaInicioNum);
+      return !reservas.some(r => {
+        const rInicio = parseInt(r.horaInicio.replace(':', ''));
+        const rFim = parseInt(r.horaFim.replace(':', ''));
+        return inicio < rFim && fim > rInicio;
       });
     } catch (error) {
       console.error('Erro ao verificar disponibilidade:', error);
-      return false;
+      throw error;
     }
   }
 }

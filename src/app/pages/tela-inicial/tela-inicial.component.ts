@@ -7,7 +7,10 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-   
+     <!-- Logo no canto superior esquerdo -->
+       <div class="absolute z-10">
+      <img src="assets/images/logo-espaco-elias-sem-fundo.png" alt="Logo Espaço Elias" class="h-[15rem] w-[15rem]">
+    </div>
     <!-- Hero Section -->
     <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div class="absolute inset-0 z-0">
@@ -23,27 +26,29 @@ import { RouterModule } from '@angular/router';
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
           Bem-vindo ao 
           <span class="bg-gradient-to-r from-dourado-400 to-dourado-600 bg-clip-text text-transparent">
-            Salão do Elias
+            Espaço Elias
           </span>
         </h1>
+
         <p class="text-xl sm:text-2xl mb-8 animate-fade-in text-gray-200 max-w-3xl mx-auto">
-          O espaço perfeito para suas celebrações especiais. 
-          Ambiente elegante, serviços de qualidade e momentos inesquecíveis.
+          Um salão de festas amplo e acolhedor, perfeito para transformar seus momentos especiais em memórias inesquecíveis.  
+          Com 300m² de estrutura, o Espaço Elias oferece elegância, conforto e tudo o que você precisa para comemorar com tranquilidade e segurança.
         </p>
-        
+
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up">
           <a routerLink="/agendamento" 
-             class="btn-primary text-lg px-8 py-4 hover:scale-110 transform transition-all duration-300">
+            class="btn-primary text-lg px-8 py-4 hover:scale-110 transform transition-all duration-300">
             <i class="pi pi-calendar mr-2"></i>
             Faça sua Reserva
           </a>
           <a routerLink="/fotos" 
-             class="btn-secondary text-lg px-8 py-4 hover:scale-110 transform transition-all duration-300">
+            class="btn-secondary text-lg px-8 py-4 hover:scale-110 transform transition-all duration-300">
             <i class="pi pi-images mr-2"></i>
             Ver Galeria
           </a>
         </div>
       </div>
+
 
       <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce-subtle">
         <i class="pi pi-chevron-down text-2xl"></i>

@@ -1,12 +1,13 @@
 export const environment = {
   production: true,
   firebase: {
-    apiKey: "sua-api-key-producao",
-    authDomain: "seu-projeto.firebaseapp.com",
-    projectId: "seu-projeto-id",
-    storageBucket: "seu-projeto.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "sua-app-id-producao"
+    apiKey: "AIzaSyBREVfi13BW0fAXySa8wUY4XjMNjc1M4fY",
+    authDomain: "espaco-elias.firebaseapp.com",
+    projectId: "espaco-elias",
+    storageBucket: "espaco-elias.firebasestorage.app",
+    messagingSenderId: "602259329135",
+    appId: "1:602259329135:web:4ed7ec3864090bc37d7d9a",
+    measurementId: "G-KPT4LQPBEP"
   },
   stripe: {
     publicKey: "pk_live_sua_chave_stripe_producao"
