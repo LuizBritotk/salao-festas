@@ -303,7 +303,7 @@ export class TelaInicialComponent implements OnInit {
   }
 ];
 
-
+ 
   galeriaFotos = [
     { nome: 'Salão Decorado', categoria: 'Ambiente', url: 'assets/images/foto-salao-decorado.jpg' },
     { nome: 'Mesa Decorada', categoria: 'Decoração', url: 'assets/images/foto-mesa-decorado.jpg' },
